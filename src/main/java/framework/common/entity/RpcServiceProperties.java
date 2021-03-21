@@ -1,10 +1,12 @@
 package framework.common.entity;
 
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Setter;
 
 @Builder
 @Setter
+@Getter
 public class RpcServiceProperties {
     private String version;
     private String group;

@@ -1,11 +1,13 @@
 package framework.core.remoting.dto;
 
 import framework.common.enums.RpcResponseCodeEnum;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 
 @Setter
+@Getter
 public class RpcResponse<T> implements Serializable {
     // 整体模仿HTTP报文
     private static final long serialVersionUID = 715745410605631233L;

@@ -1,4 +1,4 @@
-package framework.core.remoting.transport.netty.client;
+package framework.core.remoting.transport.client;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,5 +1,16 @@
-package framework.core.remoting.transport.netty.client;
+package framework.core.remoting.transport.client;
 
+import framework.common.enums.CompressTypeEnum;
+import framework.common.enums.SerializationTypeEnum;
+import framework.common.factory.SingletonFactory;
+import framework.core.registry.ServiceDiscovery;
+import framework.core.registry.zk.ZkServiceDiscovery;
+import framework.core.remoting.constants.RpcConstants;
+import framework.core.remoting.dto.RpcMessage;
+import framework.core.remoting.dto.RpcRequest;
+import framework.core.remoting.dto.RpcResponse;
+import framework.core.remoting.transport.codec.RpcMessageDecoder;
+import framework.core.remoting.transport.codec.RpcMessageEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -44,7 +55,7 @@ public class NettyRpcClient {
                         p.addLast(new NettyRpcClientHandler());
                     }
                 });
-        this.serviceDiscovery = ExtensionLoader.getExtensionLoader(ServiceDiscovery.class).getExtension("zk");
+        this.serviceDiscovery = new ZkServiceDiscovery();
         this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
         this.channelProvider = SingletonFactory.getInstance(ChannelProvider.class);
     }
@@ -69,12 +80,11 @@ public class NettyRpcClient {
         return completableFuture.get();
     }
 
-    @Override
     public Object sendRpcRequest(RpcRequest rpcRequest) {
         // build return value
         CompletableFuture<RpcResponse<Object>> resultFuture = new CompletableFuture<>();
         // build rpc service name by rpcRequest
-        String rpcServiceName = rpcRequest.toRpcProperties().toRpcServiceName();
+        String rpcServiceName = rpcRequest.getRpcProperties().getRpcServiceName();
         // get server address
         InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcServiceName);
         // get  server address related channel
