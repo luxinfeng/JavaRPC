@@ -1,11 +1,15 @@
 package framework.core.remoting.transport.codec;
 
-import com.sun.org.apache.xml.internal.serialize.Serializer;
+import framework.core.serialize.Serializer;
+import framework.common.enums.SerializationTypeEnum;
 import framework.core.compress.Compress;
+import framework.core.compress.impl.GzipCompress;
 import framework.core.remoting.constants.RpcConstants;
 import framework.core.remoting.dto.RpcMessage;
 import framework.core.remoting.dto.RpcRequest;
 import framework.core.remoting.dto.RpcResponse;
+import framework.common.enums.CompressTypeEnum;
+import framework.core.serialize.impl.KryoSerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -87,14 +91,12 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
             in.readBytes(bs);
             // decompress the bytes
             String compressName = CompressTypeEnum.getName(compressType);
-            Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
-                    .getExtension(compressName);
+            Compress compress = new GzipCompress();
             bs = compress.decompress(bs);
             // deserialize the object
             String codecName = SerializationTypeEnum.getName(rpcMessage.getCodec());
             log.info("codec name: [{}] ", codecName);
-            Serializer serializer = ExtensionLoader.getExtensionLoader(Serializer.class)
-                    .getExtension(codecName);
+            Serializer serializer = new KryoSerializer();
             if (messageType == RpcConstants.REQUEST_TYPE) {
                 RpcRequest tmpValue = serializer.deserialize(bs, RpcRequest.class);
                 rpcMessage.setData(tmpValue);

@@ -1,13 +1,18 @@
 package framework.core.remoting.transport.codec;
 
-import com.sun.org.apache.xml.internal.serialize.Serializer;
+import framework.core.compress.impl.GzipCompress;
+import framework.core.serialize.Serializer;
+import framework.common.enums.CompressTypeEnum;
+import framework.common.enums.SerializationTypeEnum;
 import framework.core.compress.Compress;
 import framework.core.remoting.constants.RpcConstants;
 import framework.core.remoting.dto.RpcMessage;
+import framework.core.serialize.impl.KryoSerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.extern.slf4j.Slf4j;
+
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,13 +41,11 @@ public class RpcMessageEncoder extends MessageToByteEncoder<RpcMessage> {
                 // serialize the object
                 String codecName = SerializationTypeEnum.getName(rpcMessage.getCodec());
                 log.info("codec name: [{}] ", codecName);
-                Serializer serializer = ExtensionLoader.getExtensionLoader(Serializer.class)
-                        .getExtension(codecName);
+                Serializer serializer = new KryoSerializer();
                 bodyBytes = serializer.serialize(rpcMessage.getData());
                 // compress the bytes
                 String compressName = CompressTypeEnum.getName(rpcMessage.getCompress());
-                Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
-                        .getExtension(compressName);
+                Compress compress = new GzipCompress();
                 bodyBytes = compress.compress(bodyBytes);
                 fullLength += bodyBytes.length;
             }
